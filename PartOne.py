@@ -1,16 +1,16 @@
 #Re-assessment template 2025
 
-# Note: The template functions here and the dataframe format for structuring your solution is a suggested but not mandatory approach. You can use a different approach if you like, as long as you clearly answer the questions and communicate your answers clearly.
+# Note: The template functions here and the dataframe format for structuring your solution 
+# is a suggested but not mandatory approach. You can use a different approach if you like, 
+# as long as you clearly answer the questions and communicate your answers clearly.
 
+import pandas as pd
 import nltk
 import spacy
 from pathlib import Path
 
-
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 2000000
-
-
 
 def fk_level(text, d):
     """Returns the Flesch-Kincaid Grade Level of a text (higher grade is more difficult).
@@ -43,9 +43,26 @@ def count_syl(word, d):
 def read_novels(path=Path.cwd() / "texts" / "novels"):
     """Reads texts from a directory of .txt files and returns a DataFrame with the text, title,
     author, and year"""
-    pass
-
-
+    df = pd.DataFrame(columns=['text','title','author','year'])
+    df
+    # sort the dataframe by the year column before returning it, resetting or
+    # ignoring the dataframe index.
+    for filename in path:
+        # read text from file
+        try:
+            with open(filename, newline='', encoding='utf-8') as openbook:
+                text = openbook.readlines()
+                nameparts = str.split(filename,'-')
+                # sample filename: The_Secret_Garden-Burnett-1911
+                title = nameparts[0]
+                author = nameparts[1]
+                year = nameparts[2]
+                df.add({text, title, author, year})
+        except FileNotFoundError:
+            print(f"Error: File '{filename}' not found.")
+    
+    return df.sort_values('year')
+    
 def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
     """Parses the text of a DataFrame using spaCy, stores the parsed docs as a column and writes 
     the resulting  DataFrame to a pickle file"""
@@ -54,8 +71,13 @@ def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
 
 def nltk_ttr(text):
     """Calculates the type-token ratio of a text. Text is tokenized using nltk.word_tokenize."""
-    pass
 
+    # Tokenize the text using the NLTK library only.
+    # Do not include punctuation as tokens, and ignore case when counting types.
+    num_tokens = nltk.tokenizer(text)
+    text_count = ?
+
+    return text_count / num_tokens
 
 def get_ttrs(df):
     """helper function to add ttr to a dataframe"""
@@ -63,7 +85,6 @@ def get_ttrs(df):
     for i, row in df.iterrows():
         results[row["title"]] = nltk_ttr(row["text"])
     return results
-
 
 def get_fks(df):
     """helper function to add fk scores to a dataframe"""
@@ -96,9 +117,9 @@ if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
-    #path = Path.cwd() / "p1-texts" / "novels"
-    #print(path)
-    #df = read_novels(path) # this line will fail until you have completed the read_novels function above.
+    path = Path.cwd() / "p1-texts" / "novels"
+    print(path)
+    df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     #print(df.head())
     #nltk.download("cmudict")
     #parse(df)
