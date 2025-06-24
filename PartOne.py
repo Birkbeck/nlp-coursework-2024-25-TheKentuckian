@@ -7,7 +7,10 @@
 import pandas as pd
 import nltk
 import spacy
+import spacy.cli
 from pathlib import Path
+
+spacy.cli.download("en_core_web_sm")
 
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 2000000
@@ -47,17 +50,18 @@ def read_novels(path=Path.cwd() / "texts" / "novels"):
     df
     # sort the dataframe by the year column before returning it, resetting or
     # ignoring the dataframe index.
-    for filename in path:
+    print(path)
+    for filename in path.iterdir():
         # read text from file
         try:
             with open(filename, newline='', encoding='utf-8') as openbook:
                 text = openbook.readlines()
-                nameparts = str.split(filename,'-')
+                nameparts = filename.name.replace(".txt","").split('-')
                 # sample filename: The_Secret_Garden-Burnett-1911
-                title = nameparts[0]
+                title = nameparts[0].replace('_','')
                 author = nameparts[1]
                 year = nameparts[2]
-                df.add({text, title, author, year})
+                df.loc[len(df)] = [text, title, author, year]
         except FileNotFoundError:
             print(f"Error: File '{filename}' not found.")
     
@@ -75,7 +79,8 @@ def nltk_ttr(text):
     # Tokenize the text using the NLTK library only.
     # Do not include punctuation as tokens, and ignore case when counting types.
     num_tokens = nltk.tokenizer(text)
-    text_count = ?
+    # text_count = ?
+
 
     return text_count / num_tokens
 
@@ -120,8 +125,8 @@ if __name__ == "__main__":
     path = Path.cwd() / "p1-texts" / "novels"
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
-    #print(df.head())
-    #nltk.download("cmudict")
+    print(df.head())
+    nltk.download("cmudict")
     #parse(df)
     #print(df.head())
     #print(get_ttrs(df))
