@@ -70,25 +70,41 @@ def read_novels(path=Path.cwd() / "texts" / "novels"):
 def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
     """Parses the text of a DataFrame using spaCy, stores the parsed docs as a column and writes 
     the resulting  DataFrame to a pickle file"""
-    pass
-
+    
+    parsed_docs = []
+    
+    for i, row in df.iterrows():
+        print("Starting the parse of ",row['title'])
+        doc = nlp(''.join(row['text']))
+        parsed_docs.append(doc)
+    
+    df['parsed'] = parsed_docs
+    
+    store_path.mkdir(exist_ok=True)
+    output_path = store_path / out_name
+    df.to_pickle(output_path)
+    
+    return df
 
 def nltk_ttr(text):
     """Calculates the type-token ratio of a text. Text is tokenized using nltk.word_tokenize."""
 
     # Tokenize the text using the NLTK library only.
     # Do not include punctuation as tokens, and ignore case when counting types.
-    num_tokens = nltk.tokenizer(text)
-    # text_count = ?
+    tokenized = nltk.word_tokenize(text)
+    tokens = [token.lower() for token in tokenized if token.isalpha()]
+    types = set(tokens)
+    type_count = len(types)
+    token_count = len(tokens)
 
-
-    return text_count / num_tokens
+    return type_count / token_count
 
 def get_ttrs(df):
     """helper function to add ttr to a dataframe"""
     results = {}
     for i, row in df.iterrows():
-        results[row["title"]] = nltk_ttr(row["text"])
+        text = ''.join(row['text'])
+        results[row["title"]] = nltk_ttr(text)
     return results
 
 def get_fks(df):
@@ -96,7 +112,8 @@ def get_fks(df):
     results = {}
     cmudict = nltk.corpus.cmudict.dict()
     for i, row in df.iterrows():
-        results[row["title"]] = round(fk_level(row["text"], cmudict), 4)
+        text = ''.join(row['text'])
+        results[row["title"]] = round(fk_level(text, cmudict), 4)
     return results
 
 
@@ -122,16 +139,23 @@ if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
+
+    """
     path = Path.cwd() / "p1-texts" / "novels"
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     print(df.head())
-    nltk.download("cmudict")
-    #parse(df)
-    #print(df.head())
-    #print(get_ttrs(df))
+    """
+    
+    nltk.download('cmudict')
+    nltk.download('punkt_tab')
+    
+    # df = parse(df)
+    df = pd.read_pickle(Path.cwd() / "pickles" / "parsed.pickle")
+    print(df.head())
+    print(get_ttrs(df))
+    
     #print(get_fks(df))
-    #df = pd.read_pickle(Path.cwd() / "pickles" /"name.pickle")
     # print(adjective_counts(df))
     """ 
     for i, row in df.iterrows():
