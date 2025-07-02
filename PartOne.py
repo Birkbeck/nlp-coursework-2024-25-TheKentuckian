@@ -190,7 +190,7 @@ def subjects_by_verb_pmi(doc, target_verb):
                 pmi = math.log2(verb_subject_percentage / (verb_percentage * subject_percentage))
                 pmi_scores.append((subject, pmi))
     
-    return sorted(pmi_scores, key=lambda x: x[1], reverse=True)[:5]
+    return sorted(pmi_scores, key=lambda x: x[1], reverse=True)[:10]
 
 def subjects_by_verb_count(doc, verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
@@ -204,21 +204,21 @@ def subjects_by_verb_count(doc, verb):
                     subjects.append(child.text.lower())
     
     subject_counts = Counter(subjects)
-    return subject_counts.most_common(5)
+    return subject_counts.most_common(10)
 
-def adjective_counts(df):
-    """Extracts the most common adjectives in a parsed document. Returns a list of tuples."""
+def objects_counts(df):
+    """Extracts the most common syntactic objects in a parsed document. Returns a list of tuples."""
 
     results = {}
     for i, row in df.iterrows():
-        adjectives = []
+        objects = []
         
         for token in row["parsed"]:
-            if token.pos_ == "ADJ" and not token.is_space:
-                adjectives.append(token.lemma_.lower())
+            if token.dep_ in ["dobj", "pobj"] and not token.is_space:
+                objects.append(token.orth_.lower())
         
-        adjective_counter = Counter(adjectives)
-        results[row["title"]] = adjective_counter.most_common(5)
+        objects_counter = Counter(objects)
+        results[row["title"]] = objects_counter.most_common(10)
     return results
 
 if __name__ == "__main__":
@@ -241,7 +241,8 @@ if __name__ == "__main__":
     print(get_ttrs(df))
     
     print(get_fks(df))
-    print(adjective_counts(df))
+    print(objects_counts(df))
+    """
     for i, row in df.iterrows():
         print(row["title"])
         print(subjects_by_verb_count(row["parsed"], "hear"))
@@ -251,4 +252,4 @@ if __name__ == "__main__":
         print(row["title"])
         print(subjects_by_verb_pmi(row["parsed"], "hear"))
         print("\n")
-
+    """
