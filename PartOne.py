@@ -158,9 +158,17 @@ def subjects_by_verb_pmi(doc, target_verb):
 
 def subjects_by_verb_count(doc, verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
-    pass
-
-
+    
+    subjects = []
+    
+    for token in doc:
+        if token.lemma_.lower() == verb.lower() and token.pos_ == "VERB":
+            for child in token.children:
+                if child.dep_ in ["nsubj", "nsubjpass"]:
+                    subjects.append(child.text.lower())
+    
+    subject_counts = Counter(subjects)
+    return subject_counts.most_common(5)
 
 def adjective_counts(df):
     """Extracts the most common adjectives in a parsed document. Returns a list of tuples."""
@@ -174,7 +182,7 @@ def adjective_counts(df):
                 adjectives.append(token.lemma_.lower())
         
         adjective_counter = Counter(adjectives)
-        results[row["title"]] = adjective_counter.most_common()[:5]
+        results[row["title"]] = adjective_counter.most_common(5)
     return results
 
 if __name__ == "__main__":
@@ -198,12 +206,12 @@ if __name__ == "__main__":
     
     print(get_fks(df))
     print(adjective_counts(df))
-    """ 
     for i, row in df.iterrows():
         print(row["title"])
         print(subjects_by_verb_count(row["parsed"], "hear"))
         print("\n")
 
+    """ 
     for i, row in df.iterrows():
         print(row["title"])
         print(subjects_by_verb_pmi(row["parsed"], "hear"))
