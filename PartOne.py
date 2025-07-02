@@ -9,11 +9,15 @@ import nltk
 import spacy
 import spacy.cli
 from pathlib import Path
+from collections import Counter
 
 spacy.cli.download("en_core_web_sm")
 
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 3000000
+
+nltk.download('cmudict')
+nltk.download('punkt_tab')
 
 def fk_level(parsed_text, d):
     """Returns the Flesch-Kincaid Grade Level of a text (higher grade is more difficult).
@@ -160,18 +164,21 @@ def subjects_by_verb_count(doc, verb):
 
 def adjective_counts(doc):
     """Extracts the most common adjectives in a parsed document. Returns a list of tuples."""
-    pass
-
-
+    
+    adjectives = []
+    
+    for token in doc:
+        if token.pos_ == "ADJ" and not token.is_space:
+            adjectives.append(token.lemma_.lower())
+    
+    adjective_counter = Counter(adjectives)
+    return adjective_counter.most_common()
 
 if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
 
-    nltk.download('cmudict')
-    nltk.download('punkt_tab')
-    
     """ Uncomment this block to regenerate the pickle file
     
     path = Path.cwd() / "p1-texts" / "novels"
