@@ -10,6 +10,7 @@ import spacy
 import spacy.cli
 from pathlib import Path
 from collections import Counter
+import math
 
 spacy.cli.download("en_core_web_sm")
 
@@ -152,9 +153,44 @@ def get_fks(df):
 
 def subjects_by_verb_pmi(doc, target_verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
-    pass
-
-
+    
+    verb_subject_pairs = []
+    subjects = []
+    verbs = []
+    
+    for token in doc:
+        if token.pos_ == "VERB":
+            verb = token.lemma_.lower()
+            verbs.append(verb)
+            
+            for child in token.children:
+                if child.dep_ in ["nsubj", "nsubjpass"]:
+                    subject = child.text.lower()
+                    subjects.append(subject)
+                    verb_subject_pairs.append((verb, subject))
+    
+    if len(verb_subject_pairs) == 0:
+        return []
+    
+    pairs_count = len(verb_subject_pairs)
+    verb_counts = Counter(verbs)
+    subject_counts = Counter(subjects)
+    pair_counts = Counter(verb_subject_pairs)
+    
+    pmi_scores = []
+    target_verb_lower = target_verb.lower()
+    
+    for (verb, subject), this_pair_count in pair_counts.items():
+        if verb == target_verb_lower:
+            verb_subject_percentage = this_pair_count / pairs_count
+            verb_percentage = verb_counts[verb] / len(verbs)
+            subject_percentage = subject_counts[subject] / len(subjects)
+            
+            if verb_percentage > 0 and subject_percentage > 0:
+                pmi = math.log2(verb_subject_percentage / (verb_percentage * subject_percentage))
+                pmi_scores.append((subject, pmi))
+    
+    return sorted(pmi_scores, key=lambda x: x[1], reverse=True)[:5]
 
 def subjects_by_verb_count(doc, verb):
     """Extracts the most common subjects of a given verb in a parsed document. Returns a list."""
@@ -211,10 +247,8 @@ if __name__ == "__main__":
         print(subjects_by_verb_count(row["parsed"], "hear"))
         print("\n")
 
-    """ 
     for i, row in df.iterrows():
         print(row["title"])
         print(subjects_by_verb_pmi(row["parsed"], "hear"))
         print("\n")
-    """
 
