@@ -2,7 +2,7 @@ Answers to the text questions go here.
 
 Q1(d)
 Question: 'When is the Flesch Kincaid score *not* a valid, robust or reliable estimator of text difficulty? Give two conditions. (Text answer, 200 words maximum).'
-Answer: 
+Answer: The first case I could think of would be texts which include obscure and rarely used words, e.g. cromulent. The second case would be complex sentence structures, like you would find in Shakespeare's works.
 
 Q2(f)
 Question: 'Explain your tokenizer function and discuss its performance.'
