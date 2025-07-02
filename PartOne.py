@@ -162,17 +162,20 @@ def subjects_by_verb_count(doc, verb):
 
 
 
-def adjective_counts(doc):
+def adjective_counts(df):
     """Extracts the most common adjectives in a parsed document. Returns a list of tuples."""
-    
-    adjectives = []
-    
-    for token in doc:
-        if token.pos_ == "ADJ" and not token.is_space:
-            adjectives.append(token.lemma_.lower())
-    
-    adjective_counter = Counter(adjectives)
-    return adjective_counter.most_common()
+
+    results = {}
+    for i, row in df.iterrows():
+        adjectives = []
+        
+        for token in row["parsed"]:
+            if token.pos_ == "ADJ" and not token.is_space:
+                adjectives.append(token.lemma_.lower())
+        
+        adjective_counter = Counter(adjectives)
+        results[row["title"]] = adjective_counter.most_common()[:5]
+    return results
 
 if __name__ == "__main__":
     """
@@ -194,7 +197,7 @@ if __name__ == "__main__":
     print(get_ttrs(df))
     
     print(get_fks(df))
-    # print(adjective_counts(df))
+    print(adjective_counts(df))
     """ 
     for i, row in df.iterrows():
         print(row["title"])
