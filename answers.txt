@@ -6,4 +6,4 @@ Answer: The first case I could think of would be texts which include obscure and
 
 Q2(f)
 Question: 'Explain your tokenizer function and discuss its performance.'
-Answer: 
+Answer: I was inspired by the vowel clustering approach from part one, and wanted a way to retain the compiled regex performance used in the default tokenizer. The thinking is this is a 'poor man's' lemmatization. Ideally I would have pre-processed the dataset by removing stop-words, but I ran out of time. In addition to creating the modified regex-based tokenizer, I tried various n-gram ranges, until I settled on tri-grams and 4-grams producing optimal prediction scores. Performance seems to be relatively similar to the default tokenizer approach.
