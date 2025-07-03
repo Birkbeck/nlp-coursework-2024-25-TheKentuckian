@@ -1,7 +1,10 @@
 import pandas as pd
 from pathlib import Path
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import classification_report, f1_score
 from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
 
 csv_path = Path.cwd() / "p2-texts" / "hansard40000.csv"
 
@@ -24,8 +27,24 @@ def vectorize_speeches(df):
     vectorizer = TfidfVectorizer(stop_words='english', max_features=3000)
     X = vectorizer.fit_transform(df['speech'])
     y = df['party']
-    return X, y    
+    return X, y
 
+def get_random_forest_predictions(X_train, y_train):
+    classifier = RandomForestClassifier(n_estimators=300, random_state=26)
+    classifier.fit(X_train, y_train)
+    return classifier.predict(X_test)
+
+def get_SVM_predictions(X_train, y_train):
+    classifier = SVC(kernel='linear', random_state=26)
+    classifier.fit(X_train, y_train)
+    return classifier.predict(X_test)
+
+def print_prediction_analysis(y_test, predictions):
+    score = f1_score(y_test, predictions, average='macro')
+    print("F1 score:", score)
+    print("Classification Report:")
+    print(classification_report(y_test, predictions))
+    
 if __name__ == "__main__":
     df = etl_csv()
     print(df.shape)
@@ -36,3 +55,11 @@ if __name__ == "__main__":
         test_size=0.2, 
         stratify=y, 
         random_state=26)
+
+    predictions = get_random_forest_predictions(X_train, y_train)
+    print("RandomForest Results:")
+    print_prediction_analysis(y_test, predictions)
+    
+    predictions = get_SVM_predictions(X_train, y_train)
+    print("SVM Results:")
+    print_prediction_analysis(y_test, predictions)
