@@ -29,6 +29,12 @@ def vectorize_speeches(df):
     y = df['party']
     return X, y
 
+def vectorize_speeches_including_ngrams(df):
+    vectorizer = TfidfVectorizer(stop_words='english', max_features=3000, ngram_range=(1,3))
+    X = vectorizer.fit_transform(df['speech'])
+    y = df['party']
+    return X, y
+
 def get_random_forest_predictions(X_train, y_train):
     classifier = RandomForestClassifier(n_estimators=300, random_state=26)
     classifier.fit(X_train, y_train)
@@ -42,8 +48,9 @@ def get_SVM_predictions(X_train, y_train):
 def print_prediction_analysis(y_test, predictions):
     score = f1_score(y_test, predictions, average='macro')
     print("F1 score:", score)
+    print()
     print("Classification Report:")
-    print(classification_report(y_test, predictions))
+    print(classification_report(y_test, predictions, zero_division=0))
     
 if __name__ == "__main__":
     df = etl_csv()
@@ -63,3 +70,20 @@ if __name__ == "__main__":
     predictions = get_SVM_predictions(X_train, y_train)
     print("SVM Results:")
     print_prediction_analysis(y_test, predictions)
+
+    X, y = vectorize_speeches_including_ngrams(df)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, 
+        y, 
+        test_size=0.2, 
+        stratify=y, 
+        random_state=26)
+
+    predictions = get_random_forest_predictions(X_train, y_train)
+    print("RandomForest Results (with n-grams):")
+    print_prediction_analysis(y_test, predictions)
+    
+    predictions = get_SVM_predictions(X_train, y_train)
+    print("SVM Results (with n-grams):")
+    print_prediction_analysis(y_test, predictions)
+
